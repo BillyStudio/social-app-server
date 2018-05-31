@@ -15,7 +15,7 @@ type UserController struct {
 // @Title CreateUser
 // @Description create users
 // @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {int} models.User
+// @Success 200 {int} models.User.PhoneId
 // @Failure 400 no enough input
 // @Failure 403 body is empty
 // @Failure 500 get products common error

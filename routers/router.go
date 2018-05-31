@@ -1,6 +1,6 @@
-// @APIVersion 0.1.1
+// @APIVersion 0.1.2
 // @Title social app api server
-// @Description beego框架，MySQL数据库
+// @Description 使用beego作为后端Go框架，连接MySQL数据库，Swagger UI作为API调试界面
 // @Contact billy.ustb2016@gmail.com
 // @TermsOfServiceUrl http://beego.me/
 // @License Apache 2.0
