@@ -15,7 +15,7 @@ type UserController struct {
 // @Title CreateUser
 // @Description create users
 // @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {int} models.User.Id
+// @Success 200 {int} models.User
 // @Failure 400 no enough input
 // @Failure 403 body is empty
 // @Failure 500 get products common error
@@ -31,7 +31,7 @@ func (u *UserController) Post() {
 // @Title GetAll
 // @Description get all Users
 // @Success 200 {object} models.User
-// @Failure 500 get products common error
+// @Failure 500 server internal error
 // @router / [get]
 func (u *UserController) GetAll() {
 	users := models.GetAllUsers()
