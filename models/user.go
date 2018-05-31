@@ -51,7 +51,7 @@ func AddUser(u User) string {
 	defer db.Close()
 
 	// Prepare statements for inserting data
-	statementInsert, err := db.Prepare("INSERT INTO user VALUES( ?, ?, ?)")
+	statementInsert, err := db.Prepare("INSERT INTO USER VALUES( ?, ?, ?)")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -73,7 +73,7 @@ func GetUser(uid string) (u *User, err error) {
 	defer db.Close()
 
 	// Prepare statement for reading data
-	statementOut, err := db.Prepare("SELECT user_name FROM user WHERE user_id = ?")
+	statementOut, err := db.Prepare("SELECT user_name FROM USER WHERE user_id = ?")
 	if err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
