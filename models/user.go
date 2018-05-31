@@ -62,7 +62,7 @@ func AddUser(u User) string {
 }
 
 func GetUser(uid string) (u User, err error) {
-	db, err := sql.Open("mysql", "app_root:IS1501@/social_app")
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -89,7 +89,7 @@ func GetUser(uid string) (u User, err error) {
 func GetAllUsers() map[string]*User {
 	var UserList map[string]*User
 
-	db, err := sql.Open("mysql", "app_root:IS1501@/social_app")
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -148,7 +148,7 @@ func GetAllUsers() map[string]*User {
 }
 
 func UpdateUser(uid string, uu *User) (a *User, err error) {
-	db, err := sql.Open("mysql", "app_root:IS1501@/social_app")
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -167,10 +167,10 @@ func Login(username, password string) bool {
 }
 
 func DeleteUser(uid string) {
-	db, err := sql.Open("mysql", "app_root:IS1501@/social_app")
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer db.Close()
-	
+
 }
