@@ -188,5 +188,4 @@ func DeleteUser(uid string) {
 		panic(err.Error())
 	}
 	defer db.Close()
-
 }
