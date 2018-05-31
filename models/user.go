@@ -148,27 +148,29 @@ func GetAllUsers() map[string]*User {
 }
 
 func UpdateUser(uid string, uu *User) (a *User, err error) {
-	if u, ok := UserList[uid]; ok {
-		if uu.Username != "" {
-			u.Username = uu.Username
-		}
-		if uu.Password != "" {
-			u.Password = uu.Password
-		}
-		return u, nil
+	db, err := sql.Open("mysql", "app_root:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
 	}
+	defer db.Close()
+
 	return nil, errors.New("User Not Exist")
 }
 
 func Login(username, password string) bool {
-	for _, u := range UserList {
+	/*for _, u := range UserList {
 		if u.Username == username && u.Password == password {
 			return true
 		}
-	}
+	}*/
 	return false
 }
 
 func DeleteUser(uid string) {
-	delete(UserList, uid)
+	db, err := sql.Open("mysql", "app_root:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+	
 }
