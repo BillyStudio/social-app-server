@@ -31,6 +31,7 @@ func (u *UserController) Post() {
 // @Title GetAll
 // @Description get all Users
 // @Success 200 {object} models.User
+// @Failure 500 get products common error
 // @router / [get]
 func (u *UserController) GetAll() {
 	users := models.GetAllUsers()

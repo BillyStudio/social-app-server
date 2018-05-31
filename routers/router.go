@@ -1,4 +1,4 @@
-// @APIVersion 0.1.0
+// @APIVersion 0.1.1
 // @Title social app api server
 // @Description beego框架，MySQL数据库
 // @Contact billy.ustb2016@gmail.com
