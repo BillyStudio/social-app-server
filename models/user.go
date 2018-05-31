@@ -93,8 +93,8 @@ func GetUser(uid string) (u User, err error) {
 	return UserItem, err
 }
 
-func GetAllUsers() map[string]User {
-	var UserList map[string]User
+func GetAllUsers() map[string]*User {
+	var UserList map[string]*User
 
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
@@ -128,7 +128,7 @@ func GetAllUsers() map[string]User {
 	// Fetch rows
 	for rows.Next() {
 		NewUser := User{};
-		fmt.Printf("new user --> %#v\n ", NewUser)
+
 		// get RawBytes from data
 		err = rows.Scan(scanArgs...)
 		if err != nil {
@@ -154,9 +154,10 @@ func GetAllUsers() map[string]User {
 			} else if strings.TrimSpace(columns[i]) == "PASSWORD"{
 				NewUser.Password = value;
 			}
+			fmt.Printf("new user --> %#v\n ", NewUser)
 		}
 		fmt.Println("-----------------------------------")
-		UserList[NewUser.PhoneId] = NewUser
+		UserList[NewUser.PhoneId] = &NewUser
 	}
 	if err = rows.Err(); err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
