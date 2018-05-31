@@ -127,7 +127,8 @@ func GetAllUsers() map[string]User {
 
 	// Fetch rows
 	for rows.Next() {
-		var NewUser User;
+		NewUser := User{};
+		fmt.Printf("new user --> %#v\n ", NewUser)
 		// get RawBytes from data
 		err = rows.Scan(scanArgs...)
 		if err != nil {
@@ -155,7 +156,7 @@ func GetAllUsers() map[string]User {
 			}
 		}
 		fmt.Println("-----------------------------------")
-		UserList[NewUser.PhoneId] = NewUser;
+		UserList[NewUser.PhoneId] = NewUser
 	}
 	if err = rows.Err(); err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
