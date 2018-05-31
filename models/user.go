@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"fmt"
+	"strings"
 )
 
 func init() {
@@ -145,11 +146,11 @@ func GetAllUsers() map[string]User {
 			}
 			fmt.Println(columns[i], ": ", value)
 
-			if i == 1 {
+			if strings.ToLower(columns[i]) == "user_id" {
 				NewUser.PhoneId = value;
-			} else if i == 2 {
+			} else if strings.ToLower(columns[i]) == "user_name" {
 				NewUser.Username = value;
-			} else {
+			} else if columns[i] == "password"{
 				NewUser.Password = value;
 			}
 		}
