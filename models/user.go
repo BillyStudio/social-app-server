@@ -2,8 +2,9 @@ package models
 
 import (
 	"errors"
-	"strconv"
-	"time"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
+	"fmt"
 )
 
 var (
@@ -11,16 +12,27 @@ var (
 )
 
 func init() {
-	UserList = make(map[string]*User)
-	u := User{"user_11111", "astaxie", "11111", Profile{"male", 20, "Singapore", "astaxie@gmail.com"}}
-	UserList["user_11111"] = &u
+
+	/* 连接数据库测试 */
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	// Open doesn't open a connection. Validate DSN data:
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())	// proper error handling instead of panic in your app
+	}
+
+	// Use the DB normally, execute the querys etc
 }
 
 type User struct {
-	Id       string
+	PhoneId  string
 	Username string
 	Password string
-	Profile  Profile
 }
 
 type Profile struct {
@@ -31,15 +43,49 @@ type Profile struct {
 }
 
 func AddUser(u User) string {
-	u.Id = "user_" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	UserList[u.Id] = &u
-	return u.Id
+
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	// Prepare statements for inserting data
+	statementInsert, err := db.Prepare("INSERT INTO user VALUES( ?, ?, ?)")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer statementInsert.Close() // Close the statement when we leave main() / the program terminates
+
+	// Executing inserting
+	_, err = statementInsert.Exec(u.PhoneId, u.Username, u.Password)
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+	return u.PhoneId
 }
 
 func GetUser(uid string) (u *User, err error) {
-	if u, ok := UserList[uid]; ok {
-		return u, nil
+	db, err := sql.Open("mysql", "app_root:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
 	}
+	defer db.Close()
+
+	// Prepare statement for reading data
+	statementOut, err := db.Prepare("SELECT user_name FROM user WHERE user_id = ?")
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+	defer statementOut.Close()
+
+	// Query the username
+	var Username string;
+	err = statementOut.QueryRow(uid).Scan(&Username) // WHERE number = uid
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+	fmt.Printf("The username of 123 is: %s", Username)
 	return nil, errors.New("User not exists")
 }
 
@@ -54,18 +100,6 @@ func UpdateUser(uid string, uu *User) (a *User, err error) {
 		}
 		if uu.Password != "" {
 			u.Password = uu.Password
-		}
-		if uu.Profile.Age != 0 {
-			u.Profile.Age = uu.Profile.Age
-		}
-		if uu.Profile.Address != "" {
-			u.Profile.Address = uu.Profile.Address
-		}
-		if uu.Profile.Gender != "" {
-			u.Profile.Gender = uu.Profile.Gender
-		}
-		if uu.Profile.Email != "" {
-			u.Profile.Email = uu.Profile.Email
 		}
 		return u, nil
 	}

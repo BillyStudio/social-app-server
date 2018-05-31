@@ -1,6 +1,6 @@
 // @APIVersion 0.1.0
-// @Title social app server
-// @Description beego has a very cool tools to autogenerate documents for your API
+// @Title social app api server
+// @Description beego框架，MySQL数据库
 // @Contact billy.ustb2016@gmail.com
 // @TermsOfServiceUrl http://beego.me/
 // @License Apache 2.0
