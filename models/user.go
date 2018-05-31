@@ -7,10 +7,6 @@ import (
 	"fmt"
 )
 
-var (
-	UserList map[string]*User
-)
-
 func init() {
 
 	/* 连接数据库测试 */
@@ -65,7 +61,7 @@ func AddUser(u User) string {
 	return u.PhoneId
 }
 
-func GetUser(uid string) (u *User, err error) {
+func GetUser(uid string) (u User, err error) {
 	db, err := sql.Open("mysql", "app_root:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
@@ -73,23 +69,81 @@ func GetUser(uid string) (u *User, err error) {
 	defer db.Close()
 
 	// Prepare statement for reading data
-	statementOut, err := db.Prepare("SELECT user_name FROM USER WHERE user_id = ?")
+	statementOut, err := db.Prepare("SELECT * FROM USER WHERE user_id = ?")
 	if err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
 	defer statementOut.Close()
 
 	// Query the username
-	var Username string;
-	err = statementOut.QueryRow(uid).Scan(&Username) // WHERE number = uid
-	if err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
-	}
-	fmt.Printf("The username of 123 is: %s", Username)
-	return nil, errors.New("User not exists")
+	row := statementOut.QueryRow(uid) // WHERE number = uid
+	var UserItem User
+	err = row.Scan(&UserItem.PhoneId)
+	err = row.Scan(&UserItem.Username)
+	err = row.Scan(&UserItem.Password)
+
+	fmt.Printf("The username of %v is: %v", UserItem.PhoneId, UserItem.Username)
+	return UserItem, errors.New("User not exists")
 }
 
 func GetAllUsers() map[string]*User {
+	var UserList map[string]*User
+
+	db, err := sql.Open("mysql", "app_root:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	// Execute the query
+	rows, err := db.Query("SELECT * FROM USER")
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+
+	// Get column names
+	columns, err := rows.Columns()
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+
+	// Make a slice for the values
+	values := make([]sql.RawBytes, len(columns))
+
+	// rows.Scan wants '[]interface{}' as an argument, so we must copy the
+	// references into such a slice
+	// See http://code.google.com/p/go-wiki/wiki/InterfaceSlice for details
+	scanArgs := make([]interface{}, len(values))
+	for i := range values {
+		scanArgs[i] = &values[i]
+	}
+
+	// Fetch rows
+	for rows.Next() {
+		// get RawBytes from data
+		err = rows.Scan(scanArgs...)
+		if err != nil {
+			panic(err.Error()) // proper error handling instead of panic in your app
+		}
+
+		// Now do something with the data.
+		// Here we just print each column as a string.
+		var value string
+		for i, col := range values {
+			// Here we can check if the value is nil (NULL value)
+			if col == nil {
+				value = "NULL"
+			} else {
+				value = string(col)
+			}
+			fmt.Println(columns[i], ": ", value)
+		}
+		fmt.Println("-----------------------------------")
+	}
+	if err = rows.Err(); err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+
 	return UserList
 }
 

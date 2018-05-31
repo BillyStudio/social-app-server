@@ -39,7 +39,7 @@ func (u *UserController) GetAll() {
 }
 
 // @Title Get
-// @Description get user by uid
+// @Description get user by user id
 // @Param	uid		path 	string	true		"The key for staticblock"
 // @Success 200 {object} models.User
 // @Failure 403 :uid is empty
