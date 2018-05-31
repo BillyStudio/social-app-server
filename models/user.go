@@ -68,14 +68,14 @@ func GetUser(uid string) (u User, err error) {
 	}
 	defer db.Close()
 
+	var UserItem User
+	UserItem.PhoneId = uid;
 	// Prepare statement for reading data
 	RowUserName, err := db.Prepare("SELECT user_name FROM USER WHERE user_id = ?")
 	if err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
 	defer RowUserName.Close()
-
-	var UserItem User
 	// Query the username
 	err = RowUserName.QueryRow(uid).Scan(&UserItem.Username) // WHERE number = uid
 
@@ -84,7 +84,7 @@ func GetUser(uid string) (u User, err error) {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
 	defer RowPassword.Close()
-	err = RowPassword.QueryRow(uid).Scan(&UserItem.PhoneId)
+	err = RowPassword.QueryRow(uid).Scan(&UserItem.Password)
 
 	fmt.Printf("The username of %v is: %v", UserItem.PhoneId, UserItem.Username)
 	return UserItem, errors.New("User not exists")
