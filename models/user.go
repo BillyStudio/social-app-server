@@ -70,6 +70,7 @@ func GetUser(uid string) (u User, err error) {
 
 	var UserItem User
 	UserItem.PhoneId = uid;
+	fmt.Printf("uid: %v\n", UserItem.PhoneId)
 	// Prepare statement for reading data
 	RowUserName, err := db.Prepare("SELECT user_name FROM USER WHERE user_id = ?")
 	if err != nil {
@@ -78,6 +79,7 @@ func GetUser(uid string) (u User, err error) {
 	defer RowUserName.Close()
 	// Query the username
 	err = RowUserName.QueryRow(uid).Scan(&UserItem.Username) // WHERE number = uid
+	fmt.Printf("Username:%v\n", UserItem.Username)
 
 	RowPassword, err := db.Prepare("SELECT password FROM USER WHERE user_id = ?")
 	if err != nil {
@@ -85,9 +87,9 @@ func GetUser(uid string) (u User, err error) {
 	}
 	defer RowPassword.Close()
 	err = RowPassword.QueryRow(uid).Scan(&UserItem.Password)
-
-	fmt.Printf("The username of %v is: %v", UserItem.PhoneId, UserItem.Username)
-	return UserItem, errors.New("User not exists")
+	fmt.Printf("Password:%v\n", UserItem.Password)
+	
+	return UserItem, err
 }
 
 func GetAllUsers() map[string]*User {
