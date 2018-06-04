@@ -62,7 +62,7 @@ func AddUser(u User) string {
 	return u.PhoneId
 }
 
-func GetUser(uid string) (u User, err error) {
+func GetUser(PhoneId string) (u User, err error) {
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
@@ -70,8 +70,8 @@ func GetUser(uid string) (u User, err error) {
 	defer db.Close()
 
 	var UserItem User
-	UserItem.PhoneId = uid;
-	fmt.Printf("uid: %v\n", UserItem.PhoneId)
+	UserItem.PhoneId = PhoneId;
+	fmt.Printf("PhoneId: %v\n", UserItem.PhoneId)
 	// Prepare statement for reading data
 	RowUserName, err := db.Prepare("SELECT user_name FROM USER WHERE user_id = ?")
 	if err != nil {
@@ -79,7 +79,7 @@ func GetUser(uid string) (u User, err error) {
 	}
 	defer RowUserName.Close()
 	// Query the username
-	err = RowUserName.QueryRow(uid).Scan(&UserItem.Username) // WHERE number = uid
+	err = RowUserName.QueryRow(PhoneId).Scan(&UserItem.Username) // WHERE number = uid
 	fmt.Printf("Username:%v\n", UserItem.Username)
 
 	RowPassword, err := db.Prepare("SELECT password FROM USER WHERE user_id = ?")
@@ -87,7 +87,7 @@ func GetUser(uid string) (u User, err error) {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
 	defer RowPassword.Close()
-	err = RowPassword.QueryRow(uid).Scan(&UserItem.Password)
+	err = RowPassword.QueryRow(PhoneId).Scan(&UserItem.Password)
 	fmt.Printf("Password:%v\n", UserItem.Password)
 
 	return UserItem, err

@@ -23,8 +23,8 @@ type UserController struct {
 func (u *UserController) Post() {
 	var user models.User
 	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-	uid := models.AddUser(user)
-	u.Data["json"] = map[string]string{"uid": uid}
+	PhoneId := models.AddUser(user)
+	u.Data["json"] = map[string]string{"phone": PhoneId}
 	u.ServeJSON()
 }
 
@@ -41,14 +41,14 @@ func (u *UserController) GetAll() {
 
 // @Title Get
 // @Description get user by user PhoneId
-// @Param	uid		path 	string	true		"The key for staticblock"
+// @Param	phone		path 	string	true		"The key for staticblock"
 // @Success 200 {object} models.User
-// @Failure 403 :uid is empty
-// @router /:PhoneId [get]
+// @Failure 403 :phone is empty
+// @router /:phone [get]
 func (u *UserController) Get() {
-	uid := u.GetString(":uid")
-	if uid != "" {
-		user, err := models.GetUser(uid)
+	PhoneId := u.GetString(":phone")
+	if PhoneId != "" {
+		user, err := models.GetUser(PhoneId)
 		if err != nil {
 			u.Data["json"] = err.Error()
 		} else {
@@ -95,13 +95,13 @@ func (u *UserController) Delete() {
 
 // @Title Login
 // @Description Logs user into the system
-// @Param	PhoneId		query 	string	true		"The PhoneId for login"
+// @Param	phone		query 	string	true		"手机号登陆"
 // @Param	password		query 	string	true		"The password for login"
 // @Success 200 {string} login success
 // @Failure 403 user not exist
 // @router /login [get]
 func (u *UserController) Login() {
-	PhoneId := u.GetString("uid")
+	PhoneId := u.GetString("phone")
 	password := u.GetString("password")
 	if models.Login(PhoneId, password) {
 		u.Data["json"] = "login success"
