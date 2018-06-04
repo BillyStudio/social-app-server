@@ -41,10 +41,10 @@ func (u *UserController) GetAll() {
 
 // @Title Get
 // @Description get user by user PhoneId
-// @Param	phone		path 	string	true		"The key for staticblock"
+// @Param	phone		path 	string	true		"电话号码作为主键"
 // @Success 200 {object} models.User
 // @Failure 403 :phone is empty
-// @router /:phone [get]
+// @router /:PhoneId [get]
 func (u *UserController) Get() {
 	PhoneId := u.GetString(":phone")
 	if PhoneId != "" {
@@ -60,7 +60,7 @@ func (u *UserController) Get() {
 
 // @Title Update
 // @Description update the user
-// @Param	PhoneId		path 	string	true		"The uid you want to update"
+// @Param	PhoneId		path 	string	true		"The user you want to update"
 // @Param	body		body 	models.User	true		"body for user content"
 // @Success 200 {object} models.User
 // @Failure 403 :uid is not int
@@ -82,13 +82,13 @@ func (u *UserController) Put() {
 
 // @Title Delete
 // @Description delete the user
-// @Param	PhoneId		path 	string	true		"The uid you want to delete"
+// @Param	PhoneId		path 	string	true		"The user you want to delete"
 // @Success 200 {string} delete success!
 // @Failure 403 uid is empty
 // @router /:PhoneId [delete]
 func (u *UserController) Delete() {
-	uid := u.GetString(":uid")
-	models.DeleteUser(uid)
+	PhoneId := u.GetString(":phone")
+	models.DeleteUser(PhoneId)
 	u.Data["json"] = "delete success!"
 	u.ServeJSON()
 }
