@@ -44,7 +44,7 @@ func (u *UserController) GetAll() {
 // @Param	uid		path 	string	true		"The key for staticblock"
 // @Success 200 {object} models.User
 // @Failure 403 :uid is empty
-// @router /:uid [get]
+// @router /:PhoneId [get]
 func (u *UserController) Get() {
 	uid := u.GetString(":uid")
 	if uid != "" {
@@ -60,11 +60,11 @@ func (u *UserController) Get() {
 
 // @Title Update
 // @Description update the user
-// @Param	uid		path 	string	true		"The uid you want to update"
+// @Param	PhoneId		path 	string	true		"The uid you want to update"
 // @Param	body		body 	models.User	true		"body for user content"
 // @Success 200 {object} models.User
 // @Failure 403 :uid is not int
-// @router /:uid [put]
+// @router /:PhoneId [put]
 func (u *UserController) Put() {
 	uid := u.GetString(":uid")
 	if uid != "" {
@@ -82,10 +82,10 @@ func (u *UserController) Put() {
 
 // @Title Delete
 // @Description delete the user
-// @Param	uid		path 	string	true		"The uid you want to delete"
+// @Param	PhoneId		path 	string	true		"The uid you want to delete"
 // @Success 200 {string} delete success!
 // @Failure 403 uid is empty
-// @router /:uid [delete]
+// @router /:PhoneId [delete]
 func (u *UserController) Delete() {
 	uid := u.GetString(":uid")
 	models.DeleteUser(uid)
@@ -119,4 +119,3 @@ func (u *UserController) Logout() {
 	u.Data["json"] = "logout success"
 	u.ServeJSON()
 }
-
