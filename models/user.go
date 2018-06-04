@@ -178,12 +178,26 @@ func UpdateUser(uid string, uu *User) (a *User, err error) {
 }
 
 func Login(username, password string) bool {
-	/*for _, u := range UserList {
-		if u.Username == username && u.Password == password {
-			return true
-		}
-	}*/
-	return false
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	StatementFind, err := db.Prepare("select user_name from USER where user_name= ? and password= ?")
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+	defer StatementFind.Close()
+
+	// Query the username
+	row := StatementFind.QueryRow(username, password)
+	fmt.Printf("Match username:%v and password:%v\n", username, password)
+	err = row.Scan(&username);
+	if err != nil {
+		return false;
+	}
+	return true
 }
 
 func DeleteUser(uid string) {
