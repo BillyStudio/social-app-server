@@ -17,7 +17,7 @@ type MomentController struct {
 
 // @Title Create
 // @Description create and post a moment
-// @Param	body		body 	MomentContent	true		"The moment content"
+// @Param	body		body 	models.MomentContent	true		"用户发送动态包括文字和图片两部分，服务器端未检查文字和图片均为空的情况，需要在客户端进行检查"
 // @Success 200 {int} models.Moment.Id
 // @Failure 403 body is empty
 // @router / [post]
@@ -27,7 +27,7 @@ func (controller *MomentController) Post() {
 
 	MomentId := models.AddOne(raw)
 	// id为存储的文件名
-	controller.Data["json"] = map[string]int{"MomentId": MomentId}
+	controller.Data["json"] = map[string]int64{"MomentId": MomentId}
 	controller.ServeJSON()
 }
 

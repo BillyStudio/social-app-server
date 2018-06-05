@@ -22,7 +22,7 @@ type MomentContent struct {
 
 // 储存在数据库的Moment
 type Moment struct {
-	id			   int
+	id			   int64
 	PublishTime    time.Time
 	Tag	           string
 	TextLocation  string
@@ -44,10 +44,10 @@ func init() {
 	}
 }
 
-func AddOne(content MomentContent) (MomentId int) {
+func AddOne(content MomentContent) (MomentId int64) {
 	// 将发送时间作为id
 	// LEAVE：将除上发送人的余数作为id可以避免1秒内的碰撞
-	MomentId = time.Now().Second()
+	MomentId = time.Now().UnixNano()
 	var m Moment
 	m.id = MomentId
 	m.PublishTime = time.Now()
@@ -57,7 +57,7 @@ func AddOne(content MomentContent) (MomentId int) {
 
 	// 存储文本为txt
 	if content.Text != "" {
-		m.TextLocation = strconv.Itoa(MomentId) + ".txt"
+		m.TextLocation = "res/" + strconv.FormatInt(MomentId, 10) + ".txt"
 		f, err := os.OpenFile(m.TextLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Fatal(err)
@@ -72,7 +72,7 @@ func AddOne(content MomentContent) (MomentId int) {
 
 	// 存储图片为img
 	if content.Image != "" {
-		m.ImageLocation = strconv.Itoa(MomentId) + ".img"
+		m.ImageLocation = "res/" + strconv.FormatInt(MomentId, 10) + ".img"
 		f, err := os.OpenFile(m.ImageLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Fatal(err)
@@ -95,7 +95,7 @@ func AddOne(content MomentContent) (MomentId int) {
 
 	// Prepare statements for inserting data
 	statementInsert, err := db.Prepare(
-		"INSERT INTO MOMENT VALUES(moment_id=?,moment_time=?,moment_tag=?,text_location=?,image_location=?")
+		"INSERT INTO MOMENT VALUES(?, ?, ?, ?, ?)")
 	if err != nil {
 		panic(err.Error())
 	}
