@@ -74,9 +74,9 @@ func (o *MomentController) GetAll() {
 // @router /:objectId [delete]
 func (o *MomentController) Delete() {
 	StrId := o.Ctx.Input.Param(":MomentId")
-	id, err := strconv.Atoi(StrId)
+	id, err := strconv.ParseInt(StrId, 10, 64)
 	if err != nil {
-		fmt.Println(err)
+		panic(err.Error())
 	} else {
 		models.Delete(id)
 		o.Data["json"] = "delete success!"

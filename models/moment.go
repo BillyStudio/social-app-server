@@ -7,10 +7,7 @@ import (
 	"os"
 	"log"
 	"strconv"
-)
-
-var (
-	Moments map[int]*Moment
+	"fmt"
 )
 
 // 由客户端上传的Moment
@@ -23,7 +20,7 @@ type MomentContent struct {
 // 储存在数据库的Moment
 type Moment struct {
 	id			   int64
-	PublishTime    time.Time
+	PublishTime    string
 	Tag	           string
 	TextLocation  string
 	ImageLocation string
@@ -47,10 +44,10 @@ func init() {
 func AddOne(content MomentContent) (MomentId int64) {
 	// 将发送时间作为id
 	// LEAVE：将除上发送人的余数作为id可以避免1秒内的碰撞
-	MomentId = time.Now().UnixNano()
+	MomentId = time.Now().UTC().UnixNano()
 	var m Moment
 	m.id = MomentId
-	m.PublishTime = time.Now()
+	m.PublishTime = time.Now().Format("2006-01-02 15:04:05")	// 2006-01-02 15:04:05据说是Go的诞生时间
 	m.Tag = content.Tag
 
 	/* 将文本与图片作为文件存储 */
@@ -115,11 +112,52 @@ func GetOne(MomentId int) (moment *Moment, err error) {
 	return nil, errors.New("ObjectId Not Exist")
 }
 
-func GetAll() map[int]*Moment {
+func GetAll() map[int64]*Moment {
+	var Moments map[int64]*Moment
+	Moments = make(map[int64]*Moment)	// allocate memory
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	// Execute the query
+	rows, err := db.Query("SELECT * FROM MOMENT")
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+	// Get column names
+	/*columns, err := rows.Columns()
+	if err != nil {
+		panic(err.Error())
+	}*/
+
+	// 建立interface到slice的索引，values中存储每一行的数据
+	/*values := make([]sql.RawBytes, len(columns))
+	scanArgs := make([]interface{}, len(values))
+	for i := range values {
+		scanArgs[i] = &values[i]
+	}*/
+	// 按行读取
+	for rows.Next() {
+		var moment Moment
+		// get RawBytes from data
+		err = rows.Scan(&moment.id, &moment.PublishTime, &moment.Tag, &moment.TextLocation, &moment.ImageLocation)
+		fmt.Println("moment:%v", moment);
+		if err != nil {
+			fmt.Println(err);
+			panic(err.Error())
+		}
+		Moments[moment.id] = &moment
+	}
+
+	// Fetch rows
+
 	return Moments
 }
 
-func Delete(MomentId int) {
+func Delete(MomentId int64) {
+	var Moments map[int64]*Moment
 	delete(Moments, MomentId)
 }
 
