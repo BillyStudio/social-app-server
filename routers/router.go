@@ -20,6 +20,11 @@ func init() {
 				&controllers.UserController{},
 			),
 		),
+		beego.NSNamespace("/moment",
+			beego.NSInclude(
+				&controllers.MomentController{},
+			),
+		),
 	)
 	beego.AddNamespace(ns)
 }

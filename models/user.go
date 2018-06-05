@@ -39,6 +39,8 @@ type Profile struct {
 	Email   string
 }
 
+
+
 func AddUser(u User) string {
 
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
