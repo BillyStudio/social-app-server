@@ -109,6 +109,12 @@ func AddOne(content MomentContent) (MomentId int64) {
 
 func GetOne(MomentId int) (moment *Moment, err error) {
 
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
 	return nil, errors.New("ObjectId Not Exist")
 }
 
@@ -127,26 +133,47 @@ func GetAll() map[int64]*Moment {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
 	// Get column names
-	/*columns, err := rows.Columns()
+	columns, err := rows.Columns()
 	if err != nil {
 		panic(err.Error())
-	}*/
+	}
 
 	// 建立interface到slice的索引，values中存储每一行的数据
-	/*values := make([]sql.RawBytes, len(columns))
+	values := make([]sql.RawBytes, len(columns))
 	scanArgs := make([]interface{}, len(values))
 	for i := range values {
 		scanArgs[i] = &values[i]
-	}*/
+	}
 	// 按行读取
 	for rows.Next() {
 		var moment Moment
 		// get RawBytes from data
-		err = rows.Scan(&moment.id, &moment.PublishTime, &moment.Tag, &moment.TextLocation, &moment.ImageLocation)
-		fmt.Println("moment:%v", moment);
+		err = rows.Scan(scanArgs...)
 		if err != nil {
-			fmt.Println(err);
 			panic(err.Error())
+		}
+		// Now do something with the data
+		var value string
+		for i, col := range values {
+			fmt.Println(i)
+			value = string(col)
+			switch i {
+			case 0: moment.id, err = strconv.ParseInt(value, 10, 64)
+				if err != nil {
+					panic(err.Error())
+				}
+				break
+			case 1: moment.PublishTime = value
+				break
+			case 2: moment.Tag = value
+				break
+			case 3: moment.TextLocation = value
+				break
+			case 4: moment.ImageLocation = value
+				break
+			default:
+				break
+			}
 		}
 		Moments[moment.id] = &moment
 	}
