@@ -177,24 +177,26 @@ func UpdateUser(uid string, uu *User) (a *User, err error) {
 	return nil, errors.New("User Not Exist")
 }
 
-func Login(username, password string) bool {
+func Login(PhoneId, password string) bool {
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer db.Close()
 
-	StatementFind, err := db.Prepare("select user_name from USER where user_name= ? and password= ?")
+	StatementFind, err := db.Prepare("select user_name from USER where user_id= ? and password= ?")
 	if err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
 	defer StatementFind.Close()
 
 	// Query the username
-	row := StatementFind.QueryRow(username, password)
-	fmt.Printf("Match username:%v and password:%v\n", username, password)
+	row := StatementFind.QueryRow(PhoneId, password)
+	var username string;
 	err = row.Scan(&username);
+	fmt.Printf("Match username: %v\n", username)
 	if err != nil {
+		fmt.Printf("Error:%v\n", err)
 		return false;
 	}
 	return true
