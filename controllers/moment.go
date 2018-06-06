@@ -71,15 +71,16 @@ func (o *MomentController) GetAll() {
 // @Param	MomentId		path 	string	true		"The MomentId of the moment you want to delete"
 // @Success 200 {string} delete success!
 // @Failure 403 MomentId is empty
-// @router /:objectId [delete]
+// @router /:MomentId [delete]
 func (o *MomentController) Delete() {
 	StrId := o.Ctx.Input.Param(":MomentId")
 	id, err := strconv.ParseInt(StrId, 10, 64)
 	if err != nil {
 		panic(err.Error())
-	} else {
-		models.Delete(id)
+	} else if models.Delete(id) == true {
 		o.Data["json"] = "delete success!"
+	} else {
+		o.Data["json"] = "delete failure!"
 	}
 	o.ServeJSON()
 }

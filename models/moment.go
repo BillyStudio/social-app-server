@@ -116,7 +116,7 @@ func GetOne(MomentId int64) (content MomentContent, err error) {
 	defer db.Close()
 
 	// Prepare statement for reading data
-	statement, err := db.Prepare("SELECT moment_tag, text_location, image_location FROM MOMENT WHERE moment_id = ?")
+	statement, err := db.Prepare("SELECT moment_tag,text_location,image_location FROM MOMENT WHERE moment_id = ?")
 	if err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
@@ -131,7 +131,6 @@ func GetOne(MomentId int64) (content MomentContent, err error) {
 
 	// Get the file content
 	if TextLocation != "" {
-		TextLocation = "res/" + TextLocation + ".txt"
 		BytesText, err := ioutil.ReadFile(TextLocation) // just pass the file name
 		if err != nil {
 			log.Fatal(err)
@@ -141,7 +140,6 @@ func GetOne(MomentId int64) (content MomentContent, err error) {
 		content.Text = text
 	}
 	if ImageLocation != "" {
-		ImageLocation = "res/" + strconv.FormatInt(MomentId, 10) + ".img"
 		BytesImage, err := ioutil.ReadFile(ImageLocation)
 		if err != nil {
 			log.Fatal(err)
@@ -185,9 +183,7 @@ func GetAll() map[int64]*Moment {
 		var moment Moment
 		// get RawBytes from data
 		err = rows.Scan(scanArgs...)
-		if err != nil {
-			panic(err.Error())
-		}
+		CheckError(err)
 		// Now do something with the data
 		var value string
 		for i, col := range values {
@@ -219,8 +215,44 @@ func GetAll() map[int64]*Moment {
 	return Moments
 }
 
-func Delete(MomentId int64) {
-	var Moments map[int64]*Moment
-	delete(Moments, MomentId)
+func Delete(MomentId int64) bool {
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	// Prepare statement for reading data
+	statement, err := db.Prepare("delete from MOMENT where moment_id = ?")
+	if err != nil {
+		fmt.Println(err)
+		log.Fatal(err.Error())
+	}
+	defer statement.Close()
+
+	// Executing deletion
+	res, err := statement.Exec(MomentId) // WHERE moment_id = MomentId
+	if err != nil {
+		fmt.Println(err)
+		log.Fatal(err.Error())
+		return false
+	}
+	num, err := res.RowsAffected()
+	if err != nil {
+		fmt.Println(err)
+		log.Fatal(err.Error())
+		return false
+	}
+	fmt.Println(num)
+
+	return true
 }
 
+func CheckError(err error) bool {
+	if err != nil {
+		fmt.Println(err)
+		log.Fatal(err.Error())
+		return false
+	}
+	return true
+}

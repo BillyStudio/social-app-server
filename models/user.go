@@ -204,10 +204,3 @@ func Login(PhoneId, password string) bool {
 	return true
 }
 
-func DeleteUser(uid string) {
-	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
-	if err != nil {
-		panic(err.Error())
-	}
-	defer db.Close()
-}

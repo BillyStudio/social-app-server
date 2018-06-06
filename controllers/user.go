@@ -44,9 +44,9 @@ func (u *UserController) GetAll() {
 // @Param	phone	path 	string	true		"电话号码作为主键"
 // @Success 200 {object} models.User
 // @Failure 403 :phone is empty
-// @router /:phone [get]
+// @router /:PhoneId [get]
 func (u *UserController) Get() {
-	PhoneId := u.Ctx.Input.Param(":phone")
+	PhoneId := u.Ctx.Input.Param(":PhoneId")
 	if PhoneId != "" {
 		user, err := models.GetUser(PhoneId)
 		if err != nil {
@@ -77,19 +77,6 @@ func (u *UserController) Put() {
 			u.Data["json"] = uu
 		}
 	}
-	u.ServeJSON()
-}
-
-// @Title Delete
-// @Description delete the user
-// @Param	PhoneId		path 	string	true		"The user you want to delete"
-// @Success 200 {string} delete success!
-// @Failure 403 uid is empty
-// @router /:PhoneId [delete]
-func (u *UserController) Delete() {
-	PhoneId := u.GetString(":phone")
-	models.DeleteUser(PhoneId)
-	u.Data["json"] = "delete success!"
 	u.ServeJSON()
 }
 
