@@ -41,12 +41,12 @@ func (u *UserController) GetAll() {
 
 // @Title Get
 // @Description get user by user PhoneId
-// @Param	phone		path 	string	true		"电话号码作为主键"
+// @Param	phone	path 	string	true		"电话号码作为主键"
 // @Success 200 {object} models.User
 // @Failure 403 :phone is empty
-// @router /:PhoneId [get]
+// @router /:phone [get]
 func (u *UserController) Get() {
-	PhoneId := u.GetString(":phone")
+	PhoneId := u.Ctx.Input.Param(":phone")
 	if PhoneId != "" {
 		user, err := models.GetUser(PhoneId)
 		if err != nil {
