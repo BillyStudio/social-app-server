@@ -24,10 +24,9 @@ type MomentController struct {
 func (controller *MomentController) Post() {
 	var raw models.MomentContent
 	json.Unmarshal(controller.Ctx.Input.RequestBody, &raw)
-
 	MomentId := models.AddOne(raw)
 	// id为存储的文件名
-	controller.Data["json"] = map[string]int64{"MomentId": MomentId}
+	controller.Data["json"] = map[string]string{"MomentId": strconv.FormatInt(MomentId, 10)}
 	controller.ServeJSON()
 }
 

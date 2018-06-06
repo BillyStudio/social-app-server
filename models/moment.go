@@ -43,10 +43,11 @@ func init() {
 
 func AddOne(content MomentContent) (MomentId int64) {
 	// 将发送时间作为id
-	// LEAVE：将除上发送人的余数作为id可以避免1秒内的碰撞
 	MomentId = time.Now().UTC().UnixNano()
+	fmt.Printf("MomentId=%v\n", MomentId)
 	var m Moment
 	m.id = MomentId
+	fmt.Printf("m.id=%v\n", m.id)
 	m.PublishTime = time.Now().Format("2006-01-02 15:04:05")	// 2006-01-02 15:04:05据说是Go的诞生时间
 	m.Tag = content.Tag
 
@@ -84,6 +85,7 @@ func AddOne(content MomentContent) (MomentId int64) {
 
 	/* 储存 m 到数据库中 */
 
+	// 连接数据库
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
