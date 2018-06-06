@@ -32,23 +32,23 @@ func (controller *MomentController) Post() {
 }
 
 // @Title Get
-// @Description find momnent by MomentId
+// @Description find moment by MomentId
 // @Param	MomentId		path 	string	true		"输入MomentId来获取某条动态"
-// @Success 200 {object} models.Moment
+// @Success 200 {object} models.MomentContent
 // @Failure 403 :MomentId is empty
 // @router /:MomentId [get]
 func (controller *MomentController) Get() {
 	StrId := controller.Ctx.Input.Param(":MomentId")
 	if StrId != "" {
-		id, err := strconv.Atoi(StrId)
+		id, err := strconv.ParseInt(StrId, 10, 64)
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			ob, err := models.GetOne(id)
+			mo, err := models.GetOne(id)
 			if err != nil {
 				controller.Data["json"] = err.Error()
 			} else {
-				controller.Data["json"] = ob
+				controller.Data["json"] = mo
 			}
 		}
 	}

@@ -1,13 +1,13 @@
 package models
 
 import (
-	"errors"
 	"time"
 	"database/sql"
 	"os"
 	"log"
 	"strconv"
 	"fmt"
+	"io/ioutil"
 )
 
 // 由客户端上传的Moment
@@ -107,7 +107,7 @@ func AddOne(content MomentContent) (MomentId int64) {
 	return MomentId
 }
 
-func GetOne(MomentId int) (moment *Moment, err error) {
+func GetOne(MomentId int64) (content MomentContent, err error) {
 
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
@@ -115,7 +115,43 @@ func GetOne(MomentId int) (moment *Moment, err error) {
 	}
 	defer db.Close()
 
-	return nil, errors.New("ObjectId Not Exist")
+	// Prepare statement for reading data
+	statement, err := db.Prepare("SELECT moment_tag, text_location, image_location FROM MOMENT WHERE moment_id = ?")
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+	defer statement.Close()
+	// Query the username
+	var ColumnTag, ColumnText, ColumnImage []byte
+	err = statement.QueryRow(MomentId).Scan(&ColumnTag, &ColumnText, &ColumnImage) // WHERE moment_id = MomentId
+	tag := string(ColumnTag)
+	TextLocation := string(ColumnText)
+	ImageLocation := string(ColumnImage)
+	content.Tag = tag
+
+	// Get the file content
+	if TextLocation != "" {
+		TextLocation = "res/" + TextLocation + ".txt"
+		BytesText, err := ioutil.ReadFile(TextLocation) // just pass the file name
+		if err != nil {
+			log.Fatal(err)
+		}
+		text := string(BytesText)
+		fmt.Printf("text: %v\n", text)
+		content.Text = text
+	}
+	if ImageLocation != "" {
+		ImageLocation = "res/" + strconv.FormatInt(MomentId, 10) + ".img"
+		BytesImage, err := ioutil.ReadFile(ImageLocation)
+		if err != nil {
+			log.Fatal(err)
+		}
+		image := string(BytesImage)
+		fmt.Println("base64 codes of image: %v", image)
+		content.Image = image
+	}
+
+	return content, err
 }
 
 func GetAll() map[int64]*Moment {
