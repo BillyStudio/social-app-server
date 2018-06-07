@@ -12,6 +12,7 @@ import (
 
 // 由客户端上传的Moment
 type MomentContent struct {
+	UserId string
 	Text   string
 	Image  string
 	Tag    string
@@ -49,6 +50,7 @@ func AddOne(content MomentContent) int64 {
 	fmt.Printf("m.id=%v\n", m.id)
 
 	m.PublishTime = time.Now().Format("2006-01-02 15:04:05")	// 2006-01-02 15:04:05据说是Go的诞生时间
+	m.ForeignKeyUser = content.UserId
 
 	/* 将标签、文本和图片均作为文件，存储在res文件夹下 */
 
@@ -222,11 +224,11 @@ func GetAll() map[int64]*Moment {
 				break
 			case 1: moment.PublishTime = value
 				break
-			case 2: moment.Tag = value
+			case 2: moment.IfTag, err = strconv.ParseBool(value)
 				break
-			case 3: moment.TextLocation = value
+			case 3: moment.IfText, err = strconv.ParseBool(value)
 				break
-			case 4: moment.ImageLocation = value
+			case 4: moment.IfImage, err = strconv.ParseBool(value)
 				break
 			default:
 				break

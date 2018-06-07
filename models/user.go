@@ -150,11 +150,11 @@ func GetAllUsers() map[string]*User {
 			}
 			fmt.Println(columns[i], ": ", value)
 
-			if strings.TrimSpace(columns[i]) == "USER_ID" {
+			if strings.ToUpper(strings.TrimSpace(columns[i])) == "USER_ID" {
 				NewUser.PhoneId = value;
-			} else if strings.TrimSpace(columns[i]) == "USER_NAME" {
+			} else if strings.ToUpper(strings.TrimSpace(columns[i])) == "USER_NAME" {
 				NewUser.Username = value;
-			} else if strings.TrimSpace(columns[i]) == "PASSWORD"{
+			} else if strings.ToUpper(strings.TrimSpace(columns[i])) == "PASSWORD"{
 				NewUser.Password = value;
 			}
 			fmt.Printf("new user --> %#v\n ", NewUser)

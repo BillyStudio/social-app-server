@@ -18,7 +18,7 @@ type MomentController struct {
 // @Title Create
 // @Description create and post a moment
 // @Param	body	body 	models.MomentContent true "用户发送动态包括文字,图片,标签，标签以空格分开，服务器端未检查三部分均为空的情况，需要在客户端进行检查"
-// @Success 200 {int} models.Moment.Id
+// @Success 200 {int64} models.Moment.Id
 // @Failure 403 body is empty
 // @router / [post]
 func (controller *MomentController) Post() {
