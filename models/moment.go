@@ -21,9 +21,10 @@ type MomentContent struct {
 type Moment struct {
 	id			   int64
 	PublishTime    string
-	Tag	           string
-	TextLocation  string
-	ImageLocation string
+	IfTag	       bool
+	IfText         bool
+	IfImage        bool
+	ForeignKeyUser string
 }
 
 func init() {
@@ -41,22 +42,38 @@ func init() {
 	}
 }
 
-func AddOne(content MomentContent) (MomentId int64) {
+func AddOne(content MomentContent) int64 {
 	// 将发送时间作为id
-	MomentId = time.Now().UTC().UnixNano()
-	fmt.Printf("MomentId=%v\n", MomentId)
 	var m Moment
-	m.id = MomentId
+	m.id = time.Now().UTC().UnixNano()
 	fmt.Printf("m.id=%v\n", m.id)
-	m.PublishTime = time.Now().Format("2006-01-02 15:04:05")	// 2006-01-02 15:04:05据说是Go的诞生时间
-	m.Tag = content.Tag
 
-	/* 将文本与图片作为文件存储 */
+	m.PublishTime = time.Now().Format("2006-01-02 15:04:05")	// 2006-01-02 15:04:05据说是Go的诞生时间
+
+	/* 将标签、文本和图片均作为文件，存储在res文件夹下 */
+
+	// 存储标签为tag
+	if content.Tag != "" {
+		TagLocation := "res/" + strconv.FormatInt(m.id, 10) + ".tag"
+
+		f, err := os.OpenFile(TagLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if CheckError(err) {
+			if _, err := f.Write([]byte(content.Tag)); err != nil {
+				log.Fatal(err.Error())
+			}
+		}
+		if err := f.Close(); err != nil {
+			log.Fatal(err.Error())
+		}
+		m.IfTag = true
+	} else {
+		m.IfTag = false
+	}
 
 	// 存储文本为txt
 	if content.Text != "" {
-		m.TextLocation = "res/" + strconv.FormatInt(MomentId, 10) + ".txt"
-		f, err := os.OpenFile(m.TextLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		TextLocation := "res/" + strconv.FormatInt(m.id, 10) + ".txt"
+		f, err := os.OpenFile(TextLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -66,21 +83,27 @@ func AddOne(content MomentContent) (MomentId int64) {
 		if err := f.Close(); err != nil {
 			log.Fatal(err)
 		}
+		m.IfText = true
+	} else {
+		m.IfText = false
 	}
 
 	// 存储图片为img
 	if content.Image != "" {
-		m.ImageLocation = "res/" + strconv.FormatInt(MomentId, 10) + ".img"
-		f, err := os.OpenFile(m.ImageLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		ImageLocation := "res/" + strconv.FormatInt(m.id, 10) + ".img"
+		f, err := os.OpenFile(ImageLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if _, err := f.Write([]byte(content.Image)); err != nil {	// LEAVE: 存储之后再读回来
+		if _, err := f.Write([]byte(content.Image)); err != nil {
 			log.Fatal(err)
 		}
 		if err := f.Close(); err != nil {
 			log.Fatal(err)
 		}
+		m.IfImage = true
+	} else {
+		m.IfImage = false
 	}
 
 	/* 储存 m 到数据库中 */
@@ -94,19 +117,19 @@ func AddOne(content MomentContent) (MomentId int64) {
 
 	// Prepare statements for inserting data
 	statementInsert, err := db.Prepare(
-		"INSERT INTO MOMENT VALUES(?, ?, ?, ?, ?)")
+		"INSERT INTO MOMENT VALUES(?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer statementInsert.Close() // Close the statement when we leave main()/the program terminates
 
 	// Executing inserting
-	_, err = statementInsert.Exec(m.id, m.PublishTime, m.Tag, m.TextLocation, m.ImageLocation)
+	_, err = statementInsert.Exec(m.id, m.PublishTime, m.IfTag, m.IfText, m.IfImage, m.ForeignKeyUser)
 	if err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
+		fmt.Println(err)
 	}
 
-	return MomentId
+	return m.id
 }
 
 func GetOne(MomentId int64) (content MomentContent, err error) {

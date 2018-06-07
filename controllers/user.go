@@ -15,7 +15,7 @@ type UserController struct {
 // @Title CreateUser
 // @Description create users
 // @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {int} models.User.PhoneId
+// @Success 200 {string} models.User.PhoneId
 // @Failure 400 no enough input
 // @Failure 403 body is empty
 // @Failure 500 get products common error
@@ -40,10 +40,10 @@ func (u *UserController) GetAll() {
 }
 
 // @Title Get
-// @Description get user by user PhoneId
-// @Param	phone	path 	string	true		"电话号码作为主键"
+// @Description get user by phone id
+// @Param	phone	path 	string	true "电话号码作为主键,但是并没有对字符串进行是否为电话号码的检查"
 // @Success 200 {object} models.User
-// @Failure 403 :phone is empty
+// @Failure 403 phone id is empty
 // @router /:PhoneId [get]
 func (u *UserController) Get() {
 	PhoneId := u.Ctx.Input.Param(":PhoneId")
@@ -60,17 +60,17 @@ func (u *UserController) Get() {
 
 // @Title Update
 // @Description update the user
-// @Param	PhoneId		path 	string	true		"The user you want to update"
+// @Param	phone		path 	string	true		"需要更新信息的用户手机号"
 // @Param	body		body 	models.User	true		"body for user content"
 // @Success 200 {object} models.User
 // @Failure 403 :uid is not int
 // @router /:PhoneId [put]
 func (u *UserController) Put() {
-	uid := u.GetString(":uid")
-	if uid != "" {
+	PhoneId := u.GetString("phone")
+	if PhoneId != "" {
 		var user models.User
 		json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-		uu, err := models.UpdateUser(uid, &user)
+		uu, err := models.UpdateUser(PhoneId, &user)
 		if err != nil {
 			u.Data["json"] = err.Error()
 		} else {

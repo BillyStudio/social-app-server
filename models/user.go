@@ -23,7 +23,7 @@ func init() {
 		panic(err.Error())	// proper error handling instead of panic in your app
 	}
 
-	// Use the DB normally, execute the querys etc
+	// Use the DB normally, execute the queries etc
 }
 
 type User struct {
