@@ -84,16 +84,17 @@ func (u *UserController) Put() {
 // @Description Logs user into the system
 // @Param	phone		query 	string	true		"手机号登陆"
 // @Param	password		query 	string	true		"The password for login"
-// @Success 200 {string} login success
+// @Success 200 {string} token
 // @Failure 403 user not exist
 // @router /login [get]
 func (u *UserController) Login() {
 	PhoneId := u.GetString("phone")
 	password := u.GetString("password")
-	if models.Login(PhoneId, password) {
-		u.Data["json"] = "login success"
-	} else {
+	token, err := models.Login(PhoneId, password)
+	if err != nil {
 		u.Data["json"] = "user not exist"
+	} else {
+		u.Data["json"] = token
 	}
 	u.ServeJSON()
 }

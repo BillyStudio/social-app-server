@@ -30,3 +30,14 @@ create table MOMENT (
 );
 insert into MOMENT
     values (1, '2006-01-02 15:04:05', false, false, false, '12345');
+
+drop table if exists FRIEND;
+create table FRIEND (
+  host_id     varchar(12) not null,
+  follower_id varchar(12) not null,
+  primary key (host_id),
+  foreign key (fk_host_id) references USER(user_id) on delete cascade
+);
+insert into FRIEND
+  values ('12345', '17801055134');
+

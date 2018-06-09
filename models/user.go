@@ -6,6 +6,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"fmt"
 	"strings"
+	"crypto/md5"
+	"io"
+	"strconv"
+	"time"
 )
 
 func init() {
@@ -38,7 +42,6 @@ type Profile struct {
 	Address string
 	Email   string
 }
-
 
 
 func AddUser(u User) string {
@@ -179,7 +182,7 @@ func UpdateUser(uid string, uu *User) (a *User, err error) {
 	return nil, errors.New("User Not Exist")
 }
 
-func Login(PhoneId, password string) bool {
+func Login(PhoneId, password string) (token string, err error) {
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
@@ -199,8 +202,17 @@ func Login(PhoneId, password string) bool {
 	fmt.Printf("Match username: %v\n", username)
 	if err != nil {
 		fmt.Printf("Error:%v\n", err)
-		return false;
+		return "", err;
 	}
-	return true
+
+	// generate tokens
+	h := md5.New()
+	fmt.Println("h-->%v", h)
+	io.WriteString(h, strconv.FormatInt(time.Now().Unix(), 10))
+	fmt.Println("h-->%v", h)
+
+	token = fmt.Sprintf("%x", h.Sum(nil))
+	fmt.Println("token-->%v", token)
+	return token, nil
 }
 
