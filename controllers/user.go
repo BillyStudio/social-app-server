@@ -42,7 +42,7 @@ func (u *UserController) GetAll() {
 
 // @Title Get
 // @Description get user by phone id
-// @Param	phone	path 	string	true "电话号码作为主键,但是并没有对字符串进行是否为电话号码的检查"
+// @Param	PhoneId	path 	string	true "电话号码作为主键,但是并没有对字符串进行是否为电话号码的检查"
 // @Success 200 {object} models.User
 // @Failure 403 phone id is empty
 // @router /:PhoneId [get]
