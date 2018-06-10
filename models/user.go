@@ -167,9 +167,11 @@ func GetAllUsers() []User {
 		UserList[iRow] = NewUser
 		iRow = iRow + 1
 	}
+	UserList = UserList[0:iRow]
 	if err = rows.Err(); err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
+
 	return UserList
 }
 
