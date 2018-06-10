@@ -24,7 +24,7 @@ func init() {
 		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
 		AllowCredentials: true,
 	}))
-	
+
 	ns := beego.NewNamespace("/v1",
 		beego.NSNamespace("/moment",
 			beego.NSInclude(

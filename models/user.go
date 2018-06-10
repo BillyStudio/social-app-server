@@ -98,9 +98,9 @@ func GetUser(PhoneId string) (u User, err error) {
 	return UserItem, err
 }
 
-func GetAllUsers() map[string]*User {
-	var UserList map[string]*User
-	UserList = make(map[string]*User, 10)	// allocate memory
+func GetAllUsers() []User {
+	var UserList []User
+	UserList = make([]User, 20)	// allocate memory
 
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
@@ -132,6 +132,7 @@ func GetAllUsers() map[string]*User {
 	}
 
 	// Fetch rows
+	iRow := 0
 	for rows.Next() {
 		NewUser := User{};
 
@@ -163,12 +164,12 @@ func GetAllUsers() map[string]*User {
 			fmt.Printf("new user --> %#v\n ", NewUser)
 		}
 		fmt.Println("-----------------------------------")
-		UserList[NewUser.PhoneId] = &NewUser
+		UserList[iRow] = NewUser
+		iRow = iRow + 1
 	}
 	if err = rows.Err(); err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
-
 	return UserList
 }
 
