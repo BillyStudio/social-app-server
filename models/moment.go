@@ -12,7 +12,7 @@ import (
 
 // 由客户端上传的Moment
 type MomentContent struct {
-	UserId string
+	Token  string
 	Text   string
 	Image  string
 	Tag    string
@@ -50,7 +50,26 @@ func AddOne(content MomentContent) int64 {
 	fmt.Printf("m.id=%v\n", m.id)
 
 	m.PublishTime = time.Now().Format("2006-01-02 15:04:05")	// 2006-01-02 15:04:05据说是Go的诞生时间
-	m.ForeignKeyUser = content.UserId
+
+	/* 将token与user_id对应起来 */
+	// 连接数据库
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	// Prepare statement for reading data
+	statementQuery, err := db.Prepare("SELECT user_id FROM TOKEN WHERE token_id = ?")
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+	defer statementQuery.Close()
+	// Query the username
+	var ColumnUserId []byte
+	err = statementQuery.QueryRow(content.Token).Scan(&ColumnUserId) // WHERE token_id = Token
+	CheckError(err)
+	m.ForeignKeyUser = string(ColumnUserId)
 
 	/* 将标签、文本和图片均作为文件，存储在res文件夹下 */
 
@@ -109,13 +128,6 @@ func AddOne(content MomentContent) int64 {
 	}
 
 	/* 储存 m 到数据库中 */
-
-	// 连接数据库
-	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
-	if err != nil {
-		panic(err.Error())
-	}
-	defer db.Close()
 
 	// Prepare statements for inserting data
 	statementInsert, err := db.Prepare(

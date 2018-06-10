@@ -100,7 +100,7 @@ func GetUser(PhoneId string) (u User, err error) {
 
 func GetAllUsers() map[string]*User {
 	var UserList map[string]*User
-	UserList = make(map[string]*User)	// allocate memory
+	UserList = make(map[string]*User, 10)	// allocate memory
 
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {

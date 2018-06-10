@@ -43,6 +43,6 @@ insert into FRIEND
 
 drop table if exists TOKEN;
 create table TOKEN (
-  token     varchar(128) not null,
+  token_id  varchar(80) not null,
   user_id   varchar(12) not null
-)
+);
