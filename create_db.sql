@@ -41,3 +41,8 @@ create table FRIEND (
 insert into FRIEND
   values ('12345', '17801055134');
 
+drop table if exists TOKEN;
+create table TOKEN (
+  token     varchar(128) not null,
+  user_id   varchar(12) not null
+)

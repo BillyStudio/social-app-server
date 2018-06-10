@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/astaxie/beego"
+	"fmt"
 )
 
 // Operations about Users
@@ -46,7 +47,8 @@ func (u *UserController) GetAll() {
 // @Failure 403 phone id is empty
 // @router /:PhoneId [get]
 func (u *UserController) Get() {
-	PhoneId := u.Ctx.Input.Param(":PhoneId")
+	PhoneId := u.GetString(":PhoneId")
+	fmt.Printf("Debug phone:%v\n", PhoneId)
 	if PhoneId != "" {
 		user, err := models.GetUser(PhoneId)
 		if err != nil {
