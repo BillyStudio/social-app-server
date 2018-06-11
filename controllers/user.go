@@ -103,9 +103,17 @@ func (u *UserController) Login() {
 
 // @Title logout
 // @Description Logs out current logged in user session
+// @Param	token	query	string	true	"使用token（登陆令牌）注销用户"
 // @Success 200 {string} logout success
 // @router /logout [get]
 func (u *UserController) Logout() {
-	u.Data["json"] = "logout success"
+	Token := u.GetString("token")
+	err := models.Logout(Token)
+	if err != nil {
+		fmt.Println(err.Error())
+		u.Data["json"] = err
+	} else {
+		u.Data["json"] = "logout success"
+	}
 	u.ServeJSON()
 }

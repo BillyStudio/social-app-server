@@ -232,3 +232,28 @@ func Login(PhoneId, password string) (token string, err error) {
 	return token, nil
 }
 
+func Logout(Token string) (err error) {
+
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	StatementRemove, err := db.Prepare("delete from TOKEN where token_id= ?")
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+	defer StatementRemove.Close()
+
+	// Executing deletion
+	res, err := StatementRemove.Exec(Token) // WHERE token_id = Token
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	num, err := res.RowsAffected()
+	fmt.Printf("rows affected = %v\n", num)
+
+	return err
+}
