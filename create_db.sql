@@ -33,10 +33,11 @@ insert into MOMENT
 
 drop table if exists FRIEND;
 create table FRIEND (
-  host_id     varchar(12) not null,
-  follower_id varchar(12) not null,
-  primary key (host_id),
+  host_id     varchar(12) not null comment '被关注者', 
+  follower_id varchar(12) not null comment '关注者',
+  primary key (host_id, follower_id),
   foreign key (fk_host_id) references USER(user_id) on delete cascade
+  foreign key (fk_follwer_id) references USER(user_id) on delete cascade
 );
 insert into FRIEND
   values ('12345', '17801055134');
