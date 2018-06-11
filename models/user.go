@@ -10,6 +10,7 @@ import (
 	"io"
 	"strconv"
 	"time"
+	"social-app-server/utilities"
 )
 
 func init() {
@@ -216,6 +217,18 @@ func Login(PhoneId, password string) (token string, err error) {
 
 	token = fmt.Sprintf("%x", h.Sum(nil))
 	fmt.Println("token-->%v", token)
+
+	// insert into table TOKEN
+	StatementInsert, err := db.Prepare("insert into TOKEN values( ?, ?)")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer StatementInsert.Close() // Close the statement when we leave main() / the program terminates
+
+	// Executing inserting
+	_, err = StatementInsert.Exec(token, PhoneId)
+	utilities.CheckError(err)
+
 	return token, nil
 }
 

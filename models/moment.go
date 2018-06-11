@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"fmt"
 	"io/ioutil"
+	"social-app-server/utilities"
 )
 
 // 由客户端上传的Moment
@@ -51,7 +52,7 @@ func AddOne(content MomentContent) int64 {
 
 	m.PublishTime = time.Now().Format("2006-01-02 15:04:05")	// 2006-01-02 15:04:05据说是Go的诞生时间
 
-	/* 将token与user_id对应起来 */
+	/* 首先检查token是否存在，即将token与user_id对应 */
 	// 连接数据库
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
@@ -60,15 +61,15 @@ func AddOne(content MomentContent) int64 {
 	defer db.Close()
 
 	// Prepare statement for reading data
-	statementQuery, err := db.Prepare("SELECT user_id FROM TOKEN WHERE token_id = ?")
+	statementQuery, err := db.Prepare("SELECT fk_user_id FROM TOKEN WHERE token_id = ?")
 	if err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
 	defer statementQuery.Close()
-	// Query the username
+	// Query the foreign key of user id
 	var ColumnUserId []byte
 	err = statementQuery.QueryRow(content.Token).Scan(&ColumnUserId) // WHERE token_id = Token
-	CheckError(err)
+	utilities.CheckError(err)
 	m.ForeignKeyUser = string(ColumnUserId)
 
 	/* 将标签、文本和图片均作为文件，存储在res文件夹下 */
@@ -78,7 +79,7 @@ func AddOne(content MomentContent) int64 {
 		TagLocation := "res/" + strconv.FormatInt(m.id, 10) + ".tag"
 
 		f, err := os.OpenFile(TagLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if CheckError(err) {
+		if utilities.CheckError(err) {
 			if _, err := f.Write([]byte(content.Tag)); err != nil {
 				log.Fatal(err.Error())
 			}
@@ -191,9 +192,9 @@ func GetOne(MomentId int64) (content MomentContent, err error) {
 	return content, err
 }
 
-func GetAll() map[int64]*Moment {
-	var Moments map[int64]*Moment
-	Moments = make(map[int64]*Moment)	// allocate memory
+func GetAll() []*Moment {
+	var MomentSlice []*Moment
+	MomentSlice = make([]*Moment, 100)	// allocate memory
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
@@ -218,11 +219,12 @@ func GetAll() map[int64]*Moment {
 		scanArgs[i] = &values[i]
 	}
 	// 按行读取
+	iRow := 0
 	for rows.Next() {
 		var moment Moment
 		// get RawBytes from data
 		err = rows.Scan(scanArgs...)
-		CheckError(err)
+		utilities.CheckError(err)
 		// Now do something with the data
 		var value string
 		for i, col := range values {
@@ -242,16 +244,20 @@ func GetAll() map[int64]*Moment {
 				break
 			case 4: moment.IfImage, err = strconv.ParseBool(value)
 				break
+			case 5: moment.ForeignKeyUser = value
 			default:
 				break
 			}
 		}
-		Moments[moment.id] = &moment
+		MomentSlice[iRow] = &moment
+		iRow ++
+	}
+	MomentSlice = MomentSlice[0:iRow]
+	if err = rows.Err(); err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
 	}
 
-	// Fetch rows
-
-	return Moments
+	return MomentSlice
 }
 
 func Delete(MomentId int64) bool {
@@ -287,11 +293,4 @@ func Delete(MomentId int64) bool {
 	return true
 }
 
-func CheckError(err error) bool {
-	if err != nil {
-		fmt.Println(err)
-		log.Fatal(err.Error())
-		return false
-	}
-	return true
-}
+

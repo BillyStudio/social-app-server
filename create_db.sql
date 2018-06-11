@@ -15,7 +15,8 @@ create table USER (
 );
 insert into USER 
     values ('12345', 'abc', 'password');
-
+insert into USER
+    values ('17801055134', 'Shane', 'password');
 
 drop table if exists MOMENT;
 create table MOMENT (
@@ -33,11 +34,11 @@ insert into MOMENT
 
 drop table if exists FRIEND;
 create table FRIEND (
-  host_id     varchar(12) not null comment '被关注者', 
-  follower_id varchar(12) not null comment '关注者',
-  primary key (host_id, follower_id),
-  foreign key (fk_host_id) references USER(user_id) on delete cascade
-  foreign key (fk_follwer_id) references USER(user_id) on delete cascade
+  fk_host_id     varchar(12) not null, 
+  fk_follower_id varchar(12) not null,
+  primary key (fk_host_id, fk_follower_id),
+  foreign key (fk_host_id) references USER(user_id) on delete cascade,
+  foreign key (fk_follower_id) references USER(user_id) on delete cascade
 );
 insert into FRIEND
   values ('12345', '17801055134');
@@ -45,5 +46,30 @@ insert into FRIEND
 drop table if exists TOKEN;
 create table TOKEN (
   token_id  varchar(80) not null,
-  user_id   varchar(12) not null
+  fk_user_id   varchar(12) not null,
+  primary key (token_id, fk_user_id),
+  foreign key (fk_user_id) references USER(user_id) on delete cascade
 );
+insert into TOKEN 
+    values ('abcsuccessfullylogin', '12345');
+
+drop table if exists INTEREST;
+create table INTEREST (
+    fk_user_id      varchar(12) not null,
+    interest_tag    varchar(20) not null,
+    foreign key (fk_user_id) references USER(user_id) on delete cascade,
+    primary key (fk_user_id, interest_tag)
+);
+insert into INTEREST
+    values ('12345', 'tag');
+insert into INTEREST
+    values ('17801055134', 'Golang');
+
+drop table if exists AREA;
+create table AREA (
+    interest_tag    varchar(20) not null,
+    fk_moment_id       bigint not null,
+    foreign key (fk_moment_id) references MOMENT(moment_id) on delete cascade,
+    primary key (interest_tag, fk_moment_id)
+);
+
