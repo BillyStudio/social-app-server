@@ -117,3 +117,4 @@ func (u *UserController) Logout() {
 	}
 	u.ServeJSON()
 }
+
