@@ -85,11 +85,9 @@ func AddOne(content MomentContent) int64 {
 
 	/* 将标签、文本和图片均作为文件，存储在res文件夹下 */
 
-	// 存储标签为tag，并添加到AREA数据表中
+	// 存储标签为tag
 	if content.Tag != "" {
 		TagLocation := "res/" + strconv.FormatInt(m.id, 10) + ".tag"
-
-		AddInterest(content.Tag, m.id)
 
 		f, err := os.OpenFile(TagLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if utilities.CheckError(err) {
@@ -156,6 +154,9 @@ func AddOne(content MomentContent) int64 {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	// 并添加tag到AREA数据表中
+	AddInterest(content.Tag, m.id)
 
 	return m.id
 }
