@@ -32,18 +32,21 @@ func (controller *MomentController) Post() {
 
 // @Title Get
 // @Description find moment by MomentId
+// @Param	Token		query	string 	true 	"通过Token确认用户已登陆"
 // @Param	MomentId		path 	string	true		"输入MomentId来获取某条动态"
 // @Success 200 {object} models.MomentContent
 // @Failure 403 :MomentId is empty
 // @router /:MomentId [get]
 func (controller *MomentController) Get() {
+	Token := controller.GetString("Token")
+	fmt.Println("Get Token: ", Token)
 	StrId := controller.Ctx.Input.Param(":MomentId")
-	if StrId != "" {
-		id, err := strconv.ParseInt(StrId, 10, 64)
+	if StrId != "" && Token != "" {
+		MomentId, err := strconv.ParseInt(StrId, 10, 64)
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			mo, err := models.GetOne(id)
+			mo, err := models.GetOne(Token, MomentId)
 			if err != nil {
 				controller.Data["json"] = err.Error()
 			} else {

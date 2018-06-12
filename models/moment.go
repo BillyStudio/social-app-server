@@ -19,7 +19,18 @@ type MomentContent struct {
 	Tag    string
 }
 
-// 储存在数据库的Moment
+// 返回给客户端的Moment
+type MomentReturn struct {
+	StrId	string
+	Time 	string
+	Tags    string
+	Text    string
+	Image   string
+	User    string
+	Likes   string
+}
+
+// 与数据库交互的Moment，注意数据库中存储的id是长整型
 type Moment struct {
 	id			   int64
 	PublishTime    string
@@ -74,9 +85,11 @@ func AddOne(content MomentContent) int64 {
 
 	/* 将标签、文本和图片均作为文件，存储在res文件夹下 */
 
-	// 存储标签为tag
+	// 存储标签为tag，并添加到AREA数据表中
 	if content.Tag != "" {
 		TagLocation := "res/" + strconv.FormatInt(m.id, 10) + ".tag"
+
+		AddInterest(content.Tag, m.id)
 
 		f, err := os.OpenFile(TagLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if utilities.CheckError(err) {
@@ -132,7 +145,7 @@ func AddOne(content MomentContent) int64 {
 
 	// Prepare statements for inserting data
 	statementInsert, err := db.Prepare(
-		"INSERT INTO MOMENT VALUES(?, ?, ?, ?, ?, ?)")
+		"INSERT INTO MOMENT VALUES(?, ?, ?, ?, ?, ?, 0)")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -147,7 +160,7 @@ func AddOne(content MomentContent) int64 {
 	return m.id
 }
 
-func GetOne(MomentId int64) (content MomentContent, err error) {
+func GetOne(Token string, MomentId int64) (content MomentContent, err error) {
 
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
@@ -155,22 +168,30 @@ func GetOne(MomentId int64) (content MomentContent, err error) {
 	}
 	defer db.Close()
 
+	content.Token = Token
+	// LEAVE: Check if the token really exixts in the table
+
 	// Prepare statement for reading data
-	statement, err := db.Prepare("SELECT moment_tag,text_location,image_location FROM MOMENT WHERE moment_id = ?")
-	if err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
-	}
+	statement, err := db.Prepare("SELECT if_tag, if_text, if_image FROM MOMENT WHERE moment_id = ?")
+	utilities.CheckError(err)
 	defer statement.Close()
-	// Query the username
-	var ColumnTag, ColumnText, ColumnImage []byte
-	err = statement.QueryRow(MomentId).Scan(&ColumnTag, &ColumnText, &ColumnImage) // WHERE moment_id = MomentId
-	tag := string(ColumnTag)
-	TextLocation := string(ColumnText)
-	ImageLocation := string(ColumnImage)
-	content.Tag = tag
+
+	// Query
+	var IfTag, IfText, IfImage bool
+	err = statement.QueryRow(MomentId).Scan(&IfTag, &IfText, &IfImage) // WHERE moment_id = MomentId
+	fmt.Println("IfTag:-->", IfTag)
 
 	// Get the file content
-	if TextLocation != "" {
+	if IfTag {
+		TagLocation := "res/" + strconv.FormatInt(MomentId, 10) + ".tag"
+		BytesTag, err := ioutil.ReadFile(TagLocation)
+		utilities.CheckError(err)
+		Tags := string(BytesTag)
+		fmt.Printf("Tags:%v\n", Tags)
+		content.Tag = Tags
+	}
+	if IfText {
+		TextLocation := "res/" + strconv.FormatInt(MomentId, 10) + ".txt"
 		BytesText, err := ioutil.ReadFile(TextLocation) // just pass the file name
 		if err != nil {
 			log.Fatal(err)
@@ -179,22 +200,22 @@ func GetOne(MomentId int64) (content MomentContent, err error) {
 		fmt.Printf("text: %v\n", text)
 		content.Text = text
 	}
-	if ImageLocation != "" {
+	if IfImage {
+		ImageLocation := "res/" + strconv.FormatInt(MomentId, 10) + ".img"
 		BytesImage, err := ioutil.ReadFile(ImageLocation)
 		if err != nil {
 			log.Fatal(err)
 		}
 		image := string(BytesImage)
-		fmt.Println("base64 codes of image: %v", image)
+		fmt.Println("base64 string of image: ", image)
 		content.Image = image
 	}
-
 	return content, err
 }
 
-func GetAll() []*Moment {
-	var MomentSlice []*Moment
-	MomentSlice = make([]*Moment, 100)	// allocate memory
+func GetAll() []*MomentReturn {
+	var Moments []*MomentReturn
+	Moments = make([]*MomentReturn, 50) // pre-allocate memory
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
@@ -221,7 +242,7 @@ func GetAll() []*Moment {
 	// 按行读取
 	iRow := 0
 	for rows.Next() {
-		var moment Moment
+		var moment MomentReturn
 		// get RawBytes from data
 		err = rows.Scan(scanArgs...)
 		utilities.CheckError(err)
@@ -231,33 +252,45 @@ func GetAll() []*Moment {
 			fmt.Println(i)
 			value = string(col)
 			switch i {
-			case 0: moment.id, err = strconv.ParseInt(value, 10, 64)
-				if err != nil {
-					panic(err.Error())
+			case 0: moment.StrId = value
+				fmt.Println("The Moment Id is ", moment.StrId)
+			break
+			case 1: moment.Time = value
+			break
+			case 2:
+				IfTag, err := strconv.ParseBool(value)
+				utilities.CheckError(err)
+				if IfTag {
+					TagLocation := "res/" + moment.StrId + ".tag"
+					BytesTag, err := ioutil.ReadFile(TagLocation)
+					utilities.CheckError(err)
+					Tags := string(BytesTag)
+					fmt.Printf("Tags:%v\n", Tags)
+					moment.Tags = Tags
+				} else {
+					moment.Tags = ""
 				}
-				break
-			case 1: moment.PublishTime = value
-				break
-			case 2: moment.IfTag, err = strconv.ParseBool(value)
-				break
-			case 3: moment.IfText, err = strconv.ParseBool(value)
-				break
-			case 4: moment.IfImage, err = strconv.ParseBool(value)
-				break
-			case 5: moment.ForeignKeyUser = value
+			break
+			case 3: moment.Text = value
+			break
+			case 4: moment.Image = value
+			break
+			case 5: moment.User = value
+			break
+			case 6: moment.Likes = value
 			default:
 				break
 			}
 		}
-		MomentSlice[iRow] = &moment
+		Moments[iRow] = &moment
 		iRow ++
 	}
-	MomentSlice = MomentSlice[0:iRow]
+	Moments = Moments[0:iRow]
 	if err = rows.Err(); err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
 
-	return MomentSlice
+	return Moments
 }
 
 func Delete(MomentId int64) bool {
@@ -292,5 +325,4 @@ func Delete(MomentId int64) bool {
 
 	return true
 }
-
 
