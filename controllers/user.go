@@ -24,14 +24,18 @@ type UserController struct {
 func (u *UserController) Post() {
 	var user models.User
 	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-	PhoneId := models.AddUser(user)
-	u.Data["json"] = map[string]string{"phone": PhoneId}
+	PhoneId, err := models.AddUser(user)
+	if err != nil {
+		u.Data["json"] = err.Error()
+	} else {
+		u.Data["json"] = PhoneId
+	}
 	u.ServeJSON()
 }
 
 // @Title GetAll
 // @Description get all Users
-// @Success 200 {object} models.User
+// @Success 200 {object} []models.User
 // @Failure 500 server internal error
 // @router / [get]
 func (u *UserController) GetAll() {

@@ -45,7 +45,7 @@ type Profile struct {
 }
 
 
-func AddUser(u User) string {
+func AddUser(u User) (string, error) {
 
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
@@ -56,16 +56,18 @@ func AddUser(u User) string {
 	// Prepare statements for inserting data
 	statementInsert, err := db.Prepare("INSERT INTO USER VALUES( ?, ?, ?)")
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err)
+		return "", err
 	}
 	defer statementInsert.Close() // Close the statement when we leave main() / the program terminates
 
 	// Executing inserting
 	_, err = statementInsert.Exec(u.PhoneId, u.Username, u.Password)
 	if err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
+		fmt.Println(err)
+		return "", err
 	}
-	return u.PhoneId
+	return u.PhoneId, err
 }
 
 func GetUser(PhoneId string) (u User, err error) {
