@@ -39,8 +39,12 @@ func (u *UserController) Post() {
 // @Failure 500 server internal error
 // @router / [get]
 func (u *UserController) GetAll() {
-	users := models.GetAllUsers()
-	u.Data["json"] = users
+	users, err := models.GetAllUsers()
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		u.Data["json"] = users
+	}
 	u.ServeJSON()
 }
 

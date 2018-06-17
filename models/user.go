@@ -32,18 +32,16 @@ func init() {
 }
 
 type User struct {
-	PhoneId  string
-	Username string
-	Password string
+	id string
+	username string
+	password string
 }
 
 type Profile struct {
-	Gender  string
-	Age     int
-	Address string
-	Email   string
+	gender  string
+	dob     string
+	motto   string
 }
-
 
 func AddUser(u User) (string, error) {
 
@@ -57,53 +55,57 @@ func AddUser(u User) (string, error) {
 	statementInsert, err := db.Prepare("INSERT INTO USER VALUES( ?, ?, ?)")
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return "Failed when preparing INSERT statement.", err
 	}
 	defer statementInsert.Close() // Close the statement when we leave main() / the program terminates
 
 	// Executing inserting
-	_, err = statementInsert.Exec(u.PhoneId, u.Username, u.Password)
+	_, err = statementInsert.Exec(u.id, u.username, u.password)
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return "Failed when executing INSERT statement.", err
 	}
-	return u.PhoneId, err
+	return u.id, err
 }
 
-func GetUser(PhoneId string) (u User, err error) {
+func AddProfile()  {
+
+}
+
+func GetUser(userId string) (u User, err error) {
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
-	if err != nil {
-		panic(err.Error())
-	}
+	utilities.CheckError(err)
 	defer db.Close()
 
 	var UserItem User
-	UserItem.PhoneId = PhoneId;
-	fmt.Printf("PhoneId: %v\n", UserItem.PhoneId)
+	UserItem.id = userId;
+
 	// Prepare statement for reading data
 	RowUserName, err := db.Prepare("SELECT user_name FROM USER WHERE user_id = ?")
 	if err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
+		fmt.Println(err.Error())
+		return UserItem, err
 	}
 	defer RowUserName.Close()
+
 	// Query the username
-	err = RowUserName.QueryRow(PhoneId).Scan(&UserItem.Username) // WHERE number = uid
-	fmt.Printf("Username:%v\n", UserItem.Username)
+	err = RowUserName.QueryRow(userId).Scan(&UserItem.username)
+	fmt.Printf("Username:%v\n", UserItem.username)
 
 	RowPassword, err := db.Prepare("SELECT password FROM USER WHERE user_id = ?")
 	if err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
+		fmt.Println(err.Error())
+		return UserItem, err
 	}
 	defer RowPassword.Close()
-	err = RowPassword.QueryRow(PhoneId).Scan(&UserItem.Password)
-	fmt.Printf("Password:%v\n", UserItem.Password)
+	err = RowPassword.QueryRow(userId).Scan(&UserItem.password)
+	fmt.Printf("Password:%v\n", UserItem.password)
 
 	return UserItem, err
 }
 
-func GetAllUsers() []User {
-	var UserList []User
-	UserList = make([]User, 20)	// allocate memory
+func GetAllUsers() (UserList []*User, err error) {
+	UserList = make([]*User, 50)	// allocate memory, query at most 50 users once a time
 
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
@@ -114,21 +116,17 @@ func GetAllUsers() []User {
 	// Execute the query
 	rows, err := db.Query("SELECT * FROM USER")
 	if err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
+		fmt.Println(err.Error())
+		return UserList[0:1], err
 	}
 
 	// Get column names
 	columns, err := rows.Columns()
-	if err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
-	}
+	utilities.CheckError(err)
 
 	// Make a slice for the values
 	values := make([]sql.RawBytes, len(columns))
-
-	// rows.Scan wants '[]interface{}' as an argument, so we must copy the
-	// references into such a slice
-	// See http://code.google.com/p/go-wiki/wiki/InterfaceSlice for details
+	// rows.Scan wants '[]interface{}' as an argument, so we must copy the references into such a slice
 	scanArgs := make([]interface{}, len(values))
 	for i := range values {
 		scanArgs[i] = &values[i]
@@ -142,7 +140,8 @@ func GetAllUsers() []User {
 		// get RawBytes from data
 		err = rows.Scan(scanArgs...)
 		if err != nil {
-			panic(err.Error()) // proper error handling instead of panic in your app
+			fmt.Println(err)
+			return UserList[0:1], err
 		}
 
 		// Now do something with the data.
@@ -158,24 +157,24 @@ func GetAllUsers() []User {
 			fmt.Println(columns[i], ": ", value)
 
 			if strings.ToUpper(strings.TrimSpace(columns[i])) == "USER_ID" {
-				NewUser.PhoneId = value;
+				NewUser.id = value;
 			} else if strings.ToUpper(strings.TrimSpace(columns[i])) == "USER_NAME" {
-				NewUser.Username = value;
+				NewUser.username = value;
 			} else if strings.ToUpper(strings.TrimSpace(columns[i])) == "PASSWORD"{
-				NewUser.Password = value;
+				NewUser.password = value;
 			}
 			fmt.Printf("new user --> %#v\n ", NewUser)
 		}
 		fmt.Println("-----------------------------------")
-		UserList[iRow] = NewUser
+		UserList[iRow] = &NewUser
 		iRow = iRow + 1
 	}
 	UserList = UserList[0:iRow]
 	if err = rows.Err(); err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
+		return UserList, err
 	}
 
-	return UserList
+	return UserList, nil
 }
 
 func UpdateUser(uid string, uu *User) (a *User, err error) {
