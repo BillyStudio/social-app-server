@@ -2,13 +2,12 @@ package models
 
 import (
 	"database/sql"
-	"social-app-server/utilities"
 	"fmt"
 )
 
 
 // 储存在数据库的 User interest
-type Interest struct {
+type UserInterest struct {
 	UserId		string
 	InterestTag	string
 }
@@ -53,7 +52,10 @@ func AddInterest(Tags string, MomnentId int64) bool {
 
 	// Prepare statements for inserting data
 	statementInsert, err := db.Prepare("INSERT INTO AREA VALUES(?, ?)")
-	utilities.CheckError(err)
+	if err != nil {
+		fmt.Println(err.Error());
+		return false
+	}
 	defer statementInsert.Close() // Close the statement when we leave main()/the program terminates
 
 	// Executing inserting
@@ -92,3 +94,30 @@ func GetAllInterests() (InterestAreas []*InterestArea) {
 	return InterestAreas
 }
 
+func UploadInterest(userInterest UserInterest) bool {
+	// LEAVE: Split the tags
+
+	// Check the database
+	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	// Prepare statements for inserting data
+	statementInsert, err := db.Prepare("INSERT INTO INTEREST VALUES(?, ?)")
+	if err != nil {
+		fmt.Println(err.Error());
+		return false
+	}
+	defer statementInsert.Close() // Close the statement when we leave main()/the program terminates
+
+	// Executing inserting
+	_, err = statementInsert.Exec(userInterest.UserId, userInterest.InterestTag)
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+
+	return true
+}
