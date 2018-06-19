@@ -3,7 +3,6 @@ package controllers
 import (
 	"github.com/astaxie/beego"
 	"social-app-server/models"
-	"encoding/json"
 )
 
 // Operations about interest
@@ -22,6 +21,7 @@ func (o *InterestController) GetAll() {
 	o.ServeJSON()
 }
 
+/*
 // @Title Upload
 // @Description upload interests of users
 // @Param	body	body 	models.UserInterest true "用户返回所有可用标签中感兴趣的标签，每个标签以＃开头"
@@ -39,3 +39,4 @@ func (controller *InterestController) Post() {
 	}
 	controller.ServeJSON()
 }
+*/

@@ -250,11 +250,11 @@ func GetAll() []*MomentReturn {
 		// Now do something with the data
 		var value string
 		for i, col := range values {
-			fmt.Println(i)
+			//fmt.Println(i)
 			value = string(col)
 			switch i {
 			case 0: moment.StrId = value
-				fmt.Println("The Moment Id is ", moment.StrId)
+				//fmt.Println("The Moment Id is ", moment.StrId)
 			break
 			case 1: moment.Time = value
 			break
@@ -266,7 +266,7 @@ func GetAll() []*MomentReturn {
 					BytesTag, err := ioutil.ReadFile(TagLocation)
 					utilities.CheckError(err)
 					Tags := string(BytesTag)
-					fmt.Printf("Tags:%v\n", Tags)
+					//fmt.Printf("Tags:%v\n", Tags)
 					moment.Tags = Tags
 				} else {
 					moment.Tags = ""

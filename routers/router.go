@@ -25,10 +25,10 @@ func init() {
 		AllowCredentials: true,
 	}))
 
-	ns := beego.NewNamespace("/v1",
-		beego.NSNamespace("/moment",
+	ns := beego.NewNamespace("/v0",
+		beego.NSNamespace("/interest",
 			beego.NSInclude(
-				&controllers.MomentController{},
+				&controllers.InterestController{},
 			),
 		),
 		beego.NSNamespace("/user",
@@ -36,9 +36,9 @@ func init() {
 				&controllers.UserController{},
 			),
 		),
-		beego.NSNamespace("/interest",
+		beego.NSNamespace("/moment",
 			beego.NSInclude(
-				&controllers.InterestController{},
+				&controllers.MomentController{},
 			),
 		),
 	)

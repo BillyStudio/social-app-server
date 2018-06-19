@@ -20,7 +20,7 @@ type MomentController struct {
 // @Param	body	body 	models.MomentContent true "用户发送动态包括文字,图片,标签，标签以空格分开，服务器端未检查三部分均为空的情况，需要在客户端进行检查"
 // @Success 200 {int64} models.Moment.Id
 // @Failure 403 body is empty
-// @router / [post]
+// @router /PostMoment [post]
 func (controller *MomentController) Post() {
 	var raw models.MomentContent
 	json.Unmarshal(controller.Ctx.Input.RequestBody, &raw)
@@ -59,12 +59,15 @@ func (controller *MomentController) Get() {
 
 // @Title GetAll
 // @Description get all moments
-// @Success 200 {object} models.Moment
+// @Success 200 {object} models.MomentReturn
 // @Failure 403 :MomentId is empty
-// @router / [get]
-func (o *MomentController) GetAll() {
+// @router /GetAllMoments [get]
+func (o *MomentController) GetAllMoments() {
 	obs := models.GetAll()
 	o.Data["json"] = obs
+	for _, u := range obs {
+		fmt.Printf("moment: %#v\n", u);
+	}
 	o.ServeJSON()
 }
 

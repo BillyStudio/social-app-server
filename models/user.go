@@ -13,6 +13,15 @@ import (
 	"social-app-server/utilities"
 )
 
+// UserBasic
+type UserBasic struct {
+	uid string
+	username string
+	password string
+}
+
+
+
 func init() {
 
 	/* 连接数据库测试 */
@@ -27,23 +36,9 @@ func init() {
 	if err != nil {
 		panic(err.Error())	// proper error handling instead of panic in your app
 	}
-
-	// Use the DB normally, execute the queries etc
 }
 
-type User struct {
-	id string
-	username string
-	password string
-}
-
-type Profile struct {
-	gender  string
-	dob     string
-	motto   string
-}
-
-func AddUser(u User) (string, error) {
+func AddUser(u UserBasic) (string, error) {
 
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
@@ -60,25 +55,22 @@ func AddUser(u User) (string, error) {
 	defer statementInsert.Close() // Close the statement when we leave main() / the program terminates
 
 	// Executing inserting
-	_, err = statementInsert.Exec(u.id, u.username, u.password)
+	_, err = statementInsert.Exec(u.uid, u.username, u.password)
 	if err != nil {
 		fmt.Println(err)
 		return "Failed when executing INSERT statement.", err
 	}
-	return u.id, err
+	return u.uid, err
 }
 
-func AddProfile()  {
 
-}
-
-func GetUser(userId string) (u User, err error) {
+func GetUser(userId string) (u UserBasic, err error) {
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	utilities.CheckError(err)
 	defer db.Close()
 
-	var UserItem User
-	UserItem.id = userId;
+	var UserItem UserBasic
+	UserItem.uid = userId;
 
 	// Prepare statement for reading data
 	RowUserName, err := db.Prepare("SELECT user_name FROM USER WHERE user_id = ?")
@@ -104,8 +96,9 @@ func GetUser(userId string) (u User, err error) {
 	return UserItem, err
 }
 
-func GetAllUsers() (UserList []*User, err error) {
-	UserList = make([]*User, 50)	// allocate memory, query at most 50 users once a time
+func GetAllUsers() []*UserBasic {
+	var UserList []*UserBasic;
+	UserList = make([]*UserBasic, 50) // allocate memory, query at most 50 users once a time
 
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
@@ -117,7 +110,7 @@ func GetAllUsers() (UserList []*User, err error) {
 	rows, err := db.Query("SELECT * FROM USER")
 	if err != nil {
 		fmt.Println(err.Error())
-		return UserList[0:1], err
+		return UserList
 	}
 
 	// Get column names
@@ -135,13 +128,13 @@ func GetAllUsers() (UserList []*User, err error) {
 	// Fetch rows
 	iRow := 0
 	for rows.Next() {
-		NewUser := User{};
+		var NewUser UserBasic;
 
 		// get RawBytes from data
 		err = rows.Scan(scanArgs...)
 		if err != nil {
 			fmt.Println(err)
-			return UserList[0:1], err
+			return UserList
 		}
 
 		// Now do something with the data.
@@ -157,7 +150,7 @@ func GetAllUsers() (UserList []*User, err error) {
 			fmt.Println(columns[i], ": ", value)
 
 			if strings.ToUpper(strings.TrimSpace(columns[i])) == "USER_ID" {
-				NewUser.id = value;
+				NewUser.uid = value;
 			} else if strings.ToUpper(strings.TrimSpace(columns[i])) == "USER_NAME" {
 				NewUser.username = value;
 			} else if strings.ToUpper(strings.TrimSpace(columns[i])) == "PASSWORD"{
@@ -171,23 +164,23 @@ func GetAllUsers() (UserList []*User, err error) {
 	}
 	UserList = UserList[0:iRow]
 	if err = rows.Err(); err != nil {
-		return UserList, err
+		return UserList
 	}
 
-	return UserList, nil
+	return UserList
 }
 
-func UpdateUser(uid string, uu *User) (a *User, err error) {
+func UpdateUser(uid string, uu *UserBasic) (a *UserBasic, err error) {
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer db.Close()
 
-	return nil, errors.New("User Not Exist")
+	return nil, errors.New("UserBasic Not Exist")
 }
 
-func Login(PhoneId, password string) (token string, err error) {
+func Login(userId, password string) (token string, err error) {
 	db, err := sql.Open("mysql", "ubuntu:IS1501@/social_app")
 	if err != nil {
 		panic(err.Error())
@@ -201,7 +194,7 @@ func Login(PhoneId, password string) (token string, err error) {
 	defer StatementFind.Close()
 
 	// Query the username
-	row := StatementFind.QueryRow(PhoneId, password)
+	row := StatementFind.QueryRow(userId, password)
 	var username string;
 	err = row.Scan(&username);
 	fmt.Printf("Match username: %v\n", username)
@@ -227,7 +220,7 @@ func Login(PhoneId, password string) (token string, err error) {
 	defer StatementInsert.Close() // Close the statement when we leave main() / the program terminates
 
 	// Executing inserting
-	_, err = StatementInsert.Exec(token, PhoneId)
+	_, err = StatementInsert.Exec(token, userId)
 	utilities.CheckError(err)
 
 	return token, nil

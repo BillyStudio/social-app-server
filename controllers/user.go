@@ -15,50 +15,49 @@ type UserController struct {
 
 // @Title CreateUser
 // @Description create users
-// @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {string} models.User.PhoneId
+// @Param	body		body 	models.UserBasic	true		"body for user content"
+// @Success 200 {string} models.UserBasic.id
 // @Failure 400 no enough input
 // @Failure 403 body is empty
 // @Failure 500 get products common error
-// @router / [post]
+// @router /CreateUser [post]
 func (u *UserController) Post() {
-	var user models.User
+	var user models.UserBasic
 	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-	PhoneId, err := models.AddUser(user)
+	userId, err := models.AddUser(user)
 	if err != nil {
 		u.Data["json"] = err.Error()
 	} else {
-		u.Data["json"] = PhoneId
+		u.Data["json"] = userId
 	}
 	u.ServeJSON()
 }
 
 // @Title GetAll
 // @Description get all Users
-// @Success 200 {object} []models.User
+// @Success 200 {object} []models.UserBasic
 // @Failure 500 server internal error
-// @router / [get]
-func (u *UserController) GetAll() {
-	users, err := models.GetAllUsers()
-	if err != nil {
-		fmt.Println(err.Error())
-	} else {
-		u.Data["json"] = users
+// @router /GetAllUser [get]
+func (u *UserController) GetAllUsers() {
+	users := models.GetAllUsers()
+	u.Data["json"] = users
+	for _, u := range users {
+		fmt.Printf("user: %#v\n", u);
 	}
 	u.ServeJSON()
 }
 
 // @Title Get
 // @Description get user by phone id
-// @Param	PhoneId	path 	string	true "电话号码作为主键,但是并没有对字符串进行是否为电话号码的检查"
-// @Success 200 {object} models.User
+// @Param	userId	path 	string	true "电话号码作为主键,但是并没有对字符串进行是否为电话号码的检查"
+// @Success 200 {object} models.UserBasic
 // @Failure 403 phone id is empty
-// @router /:PhoneId [get]
+// @router /:UserId [get]
 func (u *UserController) Get() {
-	PhoneId := u.GetString(":PhoneId")
-	fmt.Printf("Debug phone:%v\n", PhoneId)
-	if PhoneId != "" {
-		user, err := models.GetUser(PhoneId)
+	userId := u.GetString(":userId")
+	fmt.Printf("Debug phone:%v\n", userId)
+	if userId != "" {
+		user, err := models.GetUser(userId)
 		if err != nil {
 			u.Data["json"] = err.Error()
 		} else {
@@ -70,17 +69,17 @@ func (u *UserController) Get() {
 
 // @Title Update
 // @Description update the user
-// @Param	phone		path 	string	true		"需要更新信息的用户手机号"
-// @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {object} models.User
+// @Param	uid		path 	string	true		"需要更新信息的用户手机号"
+// @Param	body		body 	models.UserBasic	true		"body for user content"
+// @Success 200 {object} models.UserBasic
 // @Failure 403 :uid is not int
-// @router /:PhoneId [put]
+// @router /:UserId [put]
 func (u *UserController) Put() {
-	PhoneId := u.GetString("phone")
-	if PhoneId != "" {
-		var user models.User
+	userId := u.GetString("uid")
+	if userId != "" {
+		var user models.UserBasic
 		json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-		uu, err := models.UpdateUser(PhoneId, &user)
+		uu, err := models.UpdateUser(userId, &user)
 		if err != nil {
 			u.Data["json"] = err.Error()
 		} else {
@@ -98,9 +97,9 @@ func (u *UserController) Put() {
 // @Failure 403 user not exist
 // @router /login [get]
 func (u *UserController) Login() {
-	PhoneId := u.GetString("phone")
+	userId := u.GetString("phone")
 	password := u.GetString("password")
-	token, err := models.Login(PhoneId, password)
+	token, err := models.Login(userId, password)
 	if err != nil {
 		u.Data["json"] = "user not exist"
 	} else {

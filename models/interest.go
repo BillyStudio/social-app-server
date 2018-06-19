@@ -6,7 +6,7 @@ import (
 )
 
 
-// 储存在数据库的 User interest
+// 储存在数据库的 UserBasic interest
 type UserInterest struct {
 	UserId		string
 	InterestTag	string
