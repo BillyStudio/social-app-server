@@ -21,7 +21,6 @@ type UserBasic struct {
 }
 
 
-
 func init() {
 
 	/* 连接数据库测试 */

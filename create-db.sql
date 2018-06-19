@@ -83,5 +83,11 @@ create table TOKEN (
 insert into TOKEN 
     values ('abcsuccessfullylogin', '12345');
 
-
+# test data
+insert into USER 
+     values ('123456456', 'TT', 'passwd');
+insert into TOKEN 
+     values ('9085cb83222cfa67d4c07d0159cde207', '123456456');
+insert into MOMENT
+     values (1528817152888728750, '2018-06-12 23:29:12', true, true, true, '123456456', 0);
 
